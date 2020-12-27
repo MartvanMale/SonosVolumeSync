@@ -1,27 +1,21 @@
 from time import sleep
 from datetime import datetime
-from util import active, volume
+from util import active, volume, discover
 from queue import Empty
 import re
 
 from soco.events import event_listener
 from soco import SoCo, discovery
 
-
+# Fill in name of Host and Slave speaker
 HostName = "Woonkamer"
+SlaveName = "SubWoofer"
 
-# Get Ip + name of both devices
-Speakers = list(discovery.discover())
-Speaker1 = Speakers[0]
-Speaker2 = Speakers[1]
-
-# return Device_Host, Device_Slave
-if Speaker1.player_name == HostName:
-    Speaker_Host = Speaker1
-    Speaker_Slave = Speaker2
-else: 
-    Speaker_Host = Speaker2
-    Speaker_Slave = Speaker1
+# Get Ip of devices based on names above
+Speaker_Host = discover.Discovery(HostName)
+Speaker_Slave = discover.Discovery(SlaveName)
+print(Speaker_Host)
+print(Speaker_Slave)
 
 # Set volume correct on change host
 def Volume(Speaker_Host, Speaker_Slave):

@@ -7,7 +7,4 @@ services:
       context: .
     volumes:
       - .:/home/vscode/app:cached
-    expose: 
-      - "1400" 
-      - "22"
     restart: unless-stopped
