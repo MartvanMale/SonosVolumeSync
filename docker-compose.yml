@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  sonos_container:
+    network_mode: host
+    init: true
+    build:
+      context: .
+    volumes:
+      - .:/home/vscode/app:cached
+    expose: 
+      - "1400" 
+      - "22"
+    restart: unless-stopped
