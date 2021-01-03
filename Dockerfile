@@ -33,3 +33,6 @@ RUN apt-get update \
 COPY ./main.py .
  
 CMD ["python3", "-u", "./main.py"]
+
+# for testing:
+# CMD ["sleep", "infinity"]

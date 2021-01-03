@@ -1,53 +1,55 @@
-from time import sleep
 from datetime import datetime
-from util import active, volume, discover
+from util import util
 from queue import Empty
-import re
 
 from soco.events import event_listener
-from soco import SoCo, discovery
+from soco import SoCo
 
 # Fill in name of Host and Slave speaker
 HostName = "Woonkamer"
 SlaveName = "SubWoofer"
 
-# Get Ip of devices based on names above
-Speaker_Host = discover.Discovery(HostName)
-Speaker_Slave = discover.Discovery(SlaveName)
-print(Speaker_Host)
-print(Speaker_Slave)
+# Discover devices based on name of speakers.
+def Discover(HostName, SlaveName):
+    global Speaker_Host, Speaker_Slave
+    Speaker_Host = util.Discovery(HostName)
+    Speaker_Slave = util.Discovery(SlaveName)
+    print(f'Speaker_Host found, name = {Speaker_Host.player_name} @ ipadress = {Speaker_Host.ip_address}')
+    print(f'Speaker_Slave found, name = {Speaker_Slave.player_name} @ ipadress = {Speaker_Slave.ip_address}')
+    return Speaker_Host, Speaker_Slave
+
+# Setup listener for changes on speaker control
+def Listener(Speaker_Host, Speaker_Slave):
+    sub = Speaker_Host.renderingControl.subscribe(auto_renew=True)
+    while True:
+        try:
+            sub.events.get(timeout=1)
+            now = datetime.now()
+            now = now.strftime("%H:%M:%S")
+            print(now)
+            Volume(Speaker_Host, Speaker_Slave)
+        except Empty:
+            pass
+
+        except KeyboardInterrupt:
+            sub.unsubscribe()
+            event_listener.stop()
+            break
 
 # Set volume correct on change host
 def Volume(Speaker_Host, Speaker_Slave):
-    now = datetime.now()
-    now = now.strftime("%H:%M:%S")
-    status = active.Active(Speaker_Slave)
-    relative_volume = volume.Get_RelativeVolume(Speaker_Host, Speaker_Slave)
-    print(now)
+    status = util.Active(Speaker_Slave)   
     if status == 'Playing':
-        print('Status = ' + status)
-        if  relative_volume == 0:     
-            print('Volume is equal')
-            print(' ')
-        else:
-            volume.Set_Volume(Speaker_Slave, relative_volume)
-            print('Set volume to ' + str(Speaker_Host.volume))
-            print(' ')
+        Speaker_Slave.volume = Speaker_Host.volume
+        print(f'Status = {status}')
+        print(f'Set volume to {Speaker_Host.volume}')
+        print(' ')
     else:
-        print('Status = ' + status)
+        print(f'Status = {status}')
         print(' ')
 
-# Setup listener for changes on speaker control
-sub = Speaker_Host.renderingControl.subscribe()
 
-while True:
-    try:
-        event = sub.events.get(timeout=1)
-        Volume(Speaker_Host, Speaker_Slave)
-    except Empty:
-        pass
-
-    except KeyboardInterrupt:
-        sub.unsubscribe()
-        event_listener.stop()
-        break
+# Run if main program
+if __name__ == "__main__":
+    Discover(HostName, SlaveName)
+    Listener(Speaker_Host, Speaker_Slave)
