@@ -19,3 +19,13 @@ def Active(Device):
         Status = "Playing"
         return Status
         
+def Mute(Speaker_Host, Speaker_Slave):
+    if Speaker_Host.mute != Speaker_Slave.mute:
+        if Speaker_Host.mute == True:
+            Speaker_Slave.mute = True
+            print(f'Set {Speaker_Slave.player_name} to Muted')
+        else:
+            Speaker_Slave.mute = False 
+            print(f'Set {Speaker_Slave.player_name} to Unmuted') 
+
+        
